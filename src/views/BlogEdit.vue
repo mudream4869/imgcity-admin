@@ -162,7 +162,7 @@ export default class BlogEdit extends Vue {
   }
 
   viewContent (): string {
-    return marked(this.blog.content).replace('src="',
+    return marked(this.blog.content).replace(/src="/g,
       'style="width:100%;" src="image://' + getFullFilename(this.blog) + '/')
   }
 

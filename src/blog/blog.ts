@@ -153,7 +153,7 @@ export function listImage (blog: Blog): string[] {
 
   const filenames: string[] = []
   fs.readdirSync(fullFolder).forEach(filename => {
-    if (filename.endsWith('.png')) {
+    if (filename.endsWith('.png') || filename.endsWith('.jpg')) {
       filenames.push(filename)
     }
   })

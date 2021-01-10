@@ -24,7 +24,7 @@
             <tr><td>標題</td> <td>日期</td> <td>檔案名稱</td> <td>操作</td></tr>
           </thead>
           <tbody>
-            <tr v-for="(blog, index) in blogs" v-bind:key="blog.filename">
+            <tr v-for="(blog, index) in blogs" v-bind:key="blog.datetime.toLocaleDateString() + blog.filename">
               <td>{{ blog.title }}</td>
               <td>{{ blog.datetime.toLocaleDateString() }}</td>
               <td>{{ blog.filename }}</td>
