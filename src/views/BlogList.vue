@@ -21,10 +21,15 @@
         <b-button v-b-modal.mdl-create-blogpost>新增文章</b-button>
         <table class="table">
           <thead>
-            <tr><td>標題</td> <td>日期</td> <td>檔案名稱</td> <td>操作</td></tr>
+            <tr>
+              <td>標題</td>
+              <td>日期</td>
+              <td>檔案名稱 </td>
+              <td>操作</td>
+            </tr>
           </thead>
           <tbody>
-            <tr v-for="(blog, index) in blogs" v-bind:key="blog.datetime.toLocaleDateString() + blog.filename">
+            <tr v-for="(blog, index) in showBlogList" v-bind:key="blog.datetime.toLocaleDateString() + blog.filename">
               <td>{{ blog.title }}</td>
               <td>{{ blog.datetime.toLocaleDateString() }}</td>
               <td>{{ blog.filename }}</td>
@@ -56,19 +61,34 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { getBloglist, Blog, getFullFilename, createBlog, deleteBlog } from '../blog/blog'
+import { getBloglist, BlogMeta, getFullFilename, createBlog, deleteBlog } from '../blog/blog'
 
 @Component({
   components: {
   }
 })
 export default class BlogList extends Vue {
-  private blogs: Blog[] = []
+  private blogs: BlogMeta[] = []
 
   private newBlogFilename = ''
   private newBlogDate = new Date()
 
   private selIndex: number | null = null
+
+  get showBlogList () {
+    const blogs = this.blogs
+    blogs.sort((blog1, blog2) => {
+      const dt1 = blog1.datetime
+      const dt2 = blog2.datetime
+      if (dt1 < dt2) {
+        return 1
+      } else if (dt1 > dt2) {
+        return -1
+      }
+      return 0
+    })
+    return blogs
+  }
 
   mounted () {
     this.blogs = getBloglist()
@@ -78,7 +98,7 @@ export default class BlogList extends Vue {
     this.blogs = getBloglist()
   }
 
-  getFullFilename (blog: Blog): string {
+  getFullFilename (blog: BlogMeta): string {
     return getFullFilename(blog)
   }
 

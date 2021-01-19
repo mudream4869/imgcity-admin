@@ -147,7 +147,7 @@ export default class BlogEdit extends Vue {
     this.blog = blog
     this.init = true
 
-    this.images = listImage(this.blog)
+    this.images = listImage(this.blog.meta)
   }
 
   save () {
@@ -163,11 +163,11 @@ export default class BlogEdit extends Vue {
 
   viewContent (): string {
     return marked(this.blog.content).replace(/src="/g,
-      'style="width:100%;" src="image://' + getFullFilename(this.blog) + '/')
+      'style="width:100%;" src="image://' + getFullFilename(this.blog.meta) + '/')
   }
 
   getFullFilename (blog: Blog): string {
-    return getFullFilename(blog)
+    return getFullFilename(blog.meta)
   }
 
   addImage () {
@@ -175,7 +175,7 @@ export default class BlogEdit extends Vue {
       return
     }
 
-    addImage(this.blog, this.selFile.path, this.newImgName)
+    addImage(this.blog.meta, this.selFile.path, this.newImgName)
     this.images.push(this.newImgName)
 
     this.selFile = null
@@ -191,7 +191,7 @@ export default class BlogEdit extends Vue {
   }
 
   delImage () {
-    delImage(this.blog, this.selImage)
+    delImage(this.blog.meta, this.selImage)
     const imgID = this.images.indexOf(this.selImage)
     this.selImage = ''
     this.images.splice(imgID, 1)

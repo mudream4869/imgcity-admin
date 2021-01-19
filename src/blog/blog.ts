@@ -4,16 +4,19 @@ import * as yaml from 'js-yaml'
 import * as path from 'path'
 import { getBlogDBPath } from '../config/config'
 
-export class Blog {
+export class BlogMeta {
   title = ''
   datetime = new Date()
   filename = ''
+}
 
+export class Blog {
+  meta = new BlogMeta()
   content = ''
 }
 
-export function getFullFilename (blog: Blog): string {
-  const dt = blog.datetime
+export function getFullFilename (blogMeta: BlogMeta): string {
+  const dt = blogMeta.datetime
   const YYYY = dt.getFullYear().toString()
 
   let MM = (dt.getMonth() + 1).toString()
@@ -25,19 +28,19 @@ export function getFullFilename (blog: Blog): string {
   if (DD.length === 1) {
     DD = '0' + DD
   }
-  return YYYY + '/' + MM + '/' + DD + '/' + blog.filename
+  return YYYY + '/' + MM + '/' + DD + '/' + blogMeta.filename
 }
 
 const dbPath = getBlogDBPath()
 
-let blogList: Blog[] = []
+let blogList: BlogMeta[] = []
 let initBlogList = false
 
 class BloglistFile {
-  bloglist: Blog[] = []
+  bloglist: BlogMeta[] = []
 }
 
-function loadBloglist (): Blog[] {
+function loadBloglist (): BlogMeta[] {
   const listFilename = path.join(dbPath, 'blog.yaml')
   const cont = fs.readFileSync(listFilename, 'utf8')
   const data = yaml.safeLoad(cont)
@@ -58,10 +61,13 @@ function commitBloglist () {
 
   const bloglist = new BloglistFile()
   bloglist.bloglist = blogList
-  fs.writeFileSync(listFilename, yaml.dump(bloglist))
+  const opt = {
+    sortKeys: true
+  }
+  fs.writeFileSync(listFilename, yaml.dump(bloglist, opt))
 }
 
-export function getBloglist (): Blog[] {
+export function getBloglist (): BlogMeta[] {
   if (!initBlogList) {
     blogList = loadBloglist()
     initBlogList = true
@@ -83,41 +89,44 @@ export function getBlog (year: number, month: number,
   }
 
   const blogs = getBloglist()
-  const blog = new Blog()
+  const blogMeta = new BlogMeta()
   blogs.forEach(b => {
     const dt = b.datetime
     if (b.filename === filename && dt.getFullYear() === year &&
         dt.getMonth() + 1 === month && dt.getDate() === day) {
-      blog.title = b.title
-      blog.datetime = new Date(b.datetime)
-      blog.filename = b.filename
+      blogMeta.title = b.title
+      blogMeta.datetime = new Date(b.datetime)
+      blogMeta.filename = b.filename
     }
   })
 
   const fullFilename = path.join(dbPath, YYYY, MM, DD, filename, 'README.md')
-  blog.content = fs.readFileSync(fullFilename, 'utf8')
+  const content = fs.readFileSync(fullFilename, 'utf8')
+  const blog = new Blog()
+  blog.meta = blogMeta
+  blog.content = content
 
   return blog
 }
 
 export function createBlog (filename: string, date: Date) {
-  const blog = new Blog()
-  blog.datetime = date
-  blog.filename = filename
-  const targetPath = path.join(dbPath, getFullFilename(blog))
+  const blogMeta = new BlogMeta()
+  blogMeta.datetime = date
+  blogMeta.filename = filename
+  const targetPath = path.join(dbPath, getFullFilename(blogMeta))
   fs.mkdirSync(targetPath, {
     recursive: true
   })
 
-  blogList.push(blog)
+  blogList.push(blogMeta)
   commitBloglist()
 
-  const fullFilename = path.join(dbPath, getFullFilename(blog), 'README.md')
+  const fullFilename = path.join(dbPath, getFullFilename(blogMeta), 'README.md')
   fs.writeFileSync(fullFilename, '')
 }
 
-export function deleteBlog (blog: Blog) {
-  const fullFilename = getFullFilename(blog)
+export function deleteBlog (blogMeta: BlogMeta) {
+  const fullFilename = getFullFilename(blogMeta)
   const blogs = getBloglist()
   for (let i = 0; i < blogs.length; i++) {
     if (getFullFilename(blogs[i]) === fullFilename) {
@@ -133,23 +142,24 @@ export function deleteBlog (blog: Blog) {
   })
 }
 
-export function saveBlog (blog: Blog) {
+export function saveBlog (fullBlog: Blog) {
+  const fullFilename = getFullFilename(fullBlog.meta)
   const blogs = getBloglist()
   for (let i = 0; i < blogs.length; i++) {
-    if (getFullFilename(blogs[i]) === getFullFilename(blog)) {
-      blogList[i].title = blog.title
+    if (getFullFilename(blogs[i]) === fullFilename) {
+      blogList[i].title = fullBlog.meta.title
       break
     }
   }
 
   commitBloglist()
 
-  const fullFilename = path.join(dbPath, getFullFilename(blog), 'README.md')
-  fs.writeFileSync(fullFilename, blog.content)
+  const contentFilename = path.join(dbPath, fullFilename, 'README.md')
+  fs.writeFileSync(contentFilename, fullBlog.content)
 }
 
-export function listImage (blog: Blog): string[] {
-  const fullFolder = path.join(dbPath, getFullFilename(blog))
+export function listImage (blogMeta: BlogMeta): string[] {
+  const fullFolder = path.join(dbPath, getFullFilename(blogMeta))
 
   const filenames: string[] = []
   fs.readdirSync(fullFolder).forEach(filename => {
@@ -161,12 +171,12 @@ export function listImage (blog: Blog): string[] {
   return filenames
 }
 
-export function addImage (blog: Blog, imgPath: string, imgName: string) {
-  const targetPath = path.join(dbPath, getFullFilename(blog), imgName)
+export function addImage (blogMeta: BlogMeta, imgPath: string, imgName: string) {
+  const targetPath = path.join(dbPath, getFullFilename(blogMeta), imgName)
   fs.copyFileSync(imgPath, targetPath)
 }
 
-export function delImage (blog: Blog, imgName: string) {
-  const fullPath = path.join(dbPath, getFullFilename(blog), imgName)
+export function delImage (blogMeta: BlogMeta, imgName: string) {
+  const fullPath = path.join(dbPath, getFullFilename(blogMeta), imgName)
   fs.unlinkSync(fullPath)
 }
