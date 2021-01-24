@@ -29,7 +29,7 @@
 
       <b-nav-form>
         <b-input-group prepend="#">
-          <b-form-input class="mr-sm-2" placeholder="標題" v-model="blog.title"></b-form-input>
+          <b-form-input class="mr-sm-2" placeholder="標題" v-model="blog.meta.title"></b-form-input>
         </b-input-group>
       </b-nav-form>
 
