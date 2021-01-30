@@ -8,6 +8,7 @@ export class BlogMeta {
   title = ''
   datetime = new Date()
   filename = ''
+  tags: string[] = []
 }
 
 export class Blog {
@@ -97,6 +98,7 @@ export function getBlog (year: number, month: number,
       blogMeta.title = b.title
       blogMeta.datetime = new Date(b.datetime)
       blogMeta.filename = b.filename
+      blogMeta.tags = b.tags
     }
   })
 
@@ -148,6 +150,7 @@ export function saveBlog (fullBlog: Blog) {
   for (let i = 0; i < blogs.length; i++) {
     if (getFullFilename(blogs[i]) === fullFilename) {
       blogList[i].title = fullBlog.meta.title
+      blogList[i].tags = fullBlog.meta.tags
       break
     }
   }

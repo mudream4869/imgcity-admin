@@ -54,6 +54,10 @@
           測試 MathJax
         </b-button>
       </b-nav-form>
+
+      <b-nav-form>
+        <b-form-tags v-model="blog.meta.tags"></b-form-tags>
+      </b-nav-form>
     </b-navbar>
 
     <div id="editor">
@@ -110,6 +114,9 @@ declare const hljs: any
 
 marked.setOptions({
   highlight: function (code: string, lang: string): any {
+    if (lang === '') {
+      return code
+    }
     return hljs.highlight(lang, code).value
   }
 })

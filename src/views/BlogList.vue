@@ -23,6 +23,7 @@
           <thead>
             <tr>
               <td>標題</td>
+              <td>標籤</td>
               <td>日期</td>
               <td>檔案名稱 </td>
               <td>操作</td>
@@ -31,6 +32,11 @@
           <tbody>
             <tr v-for="(blog, index) in showBlogList" v-bind:key="blog.datetime.toLocaleDateString() + blog.filename">
               <td>{{ blog.title }}</td>
+              <td>
+                <b-badge v-for="tag in blog.tags" v-bind:key="tag">
+                    {{ tag }}
+                </b-badge>
+              </td>
               <td>{{ blog.datetime.toLocaleDateString() }}</td>
               <td>{{ blog.filename }}</td>
               <td>
