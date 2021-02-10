@@ -1,11 +1,23 @@
 <template>
   <div class="view">
-    <b-modal id="mdl-create-blogpost" title="新增文章" @ok="createBlog">
-      <b-form-input placeholder="檔案名稱" v-model="newBlogFilename"></b-form-input>
-      <b-form-datepicker
-        class="mb-2"
-        value-as-date
-        v-model="newBlogDate"></b-form-datepicker>
+    <b-modal id="mdl-create-blogpost" title="新增文章" @ok.prevent="createBlog">
+      <b-form-group
+        label="檔案"
+        label-for="new-blog-filename"
+        invalid-feedback="不可空檔名"
+        :state="newBlogFilename.length > 0">
+        <b-form-input id="new-blog-filename" placeholder="檔案名稱" v-model="newBlogFilename"></b-form-input>
+      </b-form-group>
+
+      <b-form-group
+        label="日期"
+        label-for="new-blog-date">
+        <b-form-datepicker
+          id="new-blog-date"
+          class="mb-2"
+          value-as-date
+          v-model="newBlogDate"></b-form-datepicker>
+      </b-form-group>
     </b-modal>
 
     <b-modal
@@ -88,7 +100,7 @@ export default class BlogList extends Vue {
     const year = current.getUTCFullYear()
     const month = current.getMonth()
     const date = current.getDate()
-    return new Date(year, month, date, this.defaultHour, 0, 0)
+    return new Date(year, month, date, 0, 0, 0)
   }
 
   get showBlogList (): BlogMeta[] {
@@ -119,11 +131,20 @@ export default class BlogList extends Vue {
   }
 
   createBlog () {
+    if (this.newBlogFilename.length === 0) {
+      return
+    }
+
     this.newBlogDate.setHours(this.defaultHour)
 
     createBlog(this.newBlogFilename, this.newBlogDate)
+
     this.newBlogDate = this.today()
     this.newBlogFilename = ''
+
+    this.$nextTick(() => {
+      this.$bvModal.hide('mdl-create-blogpost')
+    })
   }
 
   deleteBlog () {
