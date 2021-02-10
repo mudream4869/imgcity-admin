@@ -74,14 +74,24 @@ import { getBloglist, BlogMeta, getFullFilename, createBlog, deleteBlog } from '
   }
 })
 export default class BlogList extends Vue {
+  private defaultHour = 16
+
   private blogs: BlogMeta[] = []
 
   private newBlogFilename = ''
-  private newBlogDate = new Date()
+  private newBlogDate = this.today()
 
   private selIndex: number | null = null
 
-  get showBlogList () {
+  today (): Date {
+    const current = new Date()
+    const year = current.getUTCFullYear()
+    const month = current.getMonth()
+    const date = current.getDate()
+    return new Date(year, month, date, this.defaultHour, 0, 0)
+  }
+
+  get showBlogList (): BlogMeta[] {
     const blogs = this.blogs
     blogs.sort((blog1, blog2) => {
       const dt1 = blog1.datetime
@@ -109,8 +119,10 @@ export default class BlogList extends Vue {
   }
 
   createBlog () {
+    this.newBlogDate.setHours(this.defaultHour)
+
     createBlog(this.newBlogFilename, this.newBlogDate)
-    this.newBlogDate = new Date()
+    this.newBlogDate = this.today()
     this.newBlogFilename = ''
   }
 
