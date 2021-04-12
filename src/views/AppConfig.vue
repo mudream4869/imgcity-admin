@@ -10,6 +10,8 @@
 
       <hr>
 
+      <b-form-input v-model.number="zoomFactor" @update="changeZoom" type="range" min="1" max="2" step="0.1"></b-form-input>
+
       <b-button variant="primary" href="#" @click="gosetDir">確定</b-button>
     </b-jumbotron>
   </div>
@@ -23,7 +25,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { remote } from 'electron'
+import { remote, webFrame } from 'electron'
 import { getBlogDBPath, setBlogDBPath } from '@/config/config'
 
 @Component({
@@ -32,8 +34,15 @@ import { getBlogDBPath, setBlogDBPath } from '@/config/config'
 })
 export default class AppConfig extends Vue {
   private dir = ''
+  private zoomFactor = 1
+
   mounted () {
     this.dir = getBlogDBPath()
+    this.zoomFactor = webFrame.getZoomFactor()
+  }
+
+  changeZoom () {
+    webFrame.setZoomFactor(this.zoomFactor)
   }
 
   browseFolder () {
@@ -50,6 +59,7 @@ export default class AppConfig extends Vue {
 
   gosetDir () {
     setBlogDBPath(this.dir)
+    webFrame.setZoomFactor(this.zoomFactor)
 
     this.$router.push({
       name: 'Home'
